@@ -1,229 +1,136 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { View,ScrollView, Text, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, ScrollView, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { BlurView } from "expo-blur";
+import axios from "axios";
+import { apiKey } from "@/constants/PageOne";
+import * as Location from 'expo-location'; // Importer expo-location
 
 export default function Corpus(){
-    return(
-        <BlurView intensity={70} style={styles.container}>
-              
-              <View style={styles.first}>
-                <Text style={styles.petitMot}>Temps nuageux entre 01:00 et 03:00, et de belles eclaircies prevues vers 03:00</Text>
-              </View>
-              
-              <ScrollView horizontal>
+   const [forecast, setForecast] = useState<any[]>([]);
+   const [loading, setLoading] = useState<boolean>(true);
+   const [error, setError] = useState<string | null>(null);
+   const [location, setLocation] = useState<Location.LocationObject | null>(null);
 
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>Maint.</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>22°</Text>
-                 </View>
+   const API_KEY = apiKey;
 
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>01 h</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>23°</Text>
-                 </View>
+   useEffect(() => {
+     const fetchForecast = async (latitude: number, longitude: number) => {
+       try {
+         const URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&lang=fr&units=metric`;
+         const response = await axios.get(URL);
+         setForecast(response.data.list.slice(0, 12)); // Récupérer les 12 premières prévisions (3 heures par intervalle)
+       } catch (err) {
+         setError('Failed to fetch forecast data');
+       } finally {
+         setLoading(false);
+       }
+     };
 
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>02 h</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>23°</Text>
-                 </View>
+     const getLocation = async () => {
+       let { status } = await Location.requestForegroundPermissionsAsync();
+       if (status !== 'granted') {
+         Alert.alert('Permission refusée', 'Impossible d\'accéder à la localisation');
+         setError('Location permission not granted');
+         setLoading(false);
+         return;
+       }
 
+       let currentLocation = await Location.getCurrentPositionAsync({});
+       setLocation(currentLocation);
 
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>03 h</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>23°</Text>
-                 </View>
+       const { latitude, longitude } = currentLocation.coords;
+       fetchForecast(latitude, longitude);
+     };
 
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>04 h</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>23°</Text>
-                 </View>
+     getLocation();
+   }, []);
 
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>05 h</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>22°</Text>
-                 </View>
+   if (loading) {
+     return <ActivityIndicator size="large" color="#fff" style={{ marginTop: 50 }} />;
+   }
 
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>06 h</Text>
-                    <Ionicons name="sunny-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>25°</Text>
-                 </View>
+   if (error) {
+     return <Text style={{ color: 'red', alignSelf: 'center' }}>{error}</Text>;
+   }
 
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>07 h</Text>
-                    <Ionicons name="sunny-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>23°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>08 h</Text>
-                    <Ionicons name="sunny-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>25°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>09 h</Text>
-                    <Ionicons name="rainy-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>27°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>10 h</Text>
-                    <Ionicons name="rainy-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>28°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>11 h</Text>
-                    <Ionicons name="cloudy-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>22°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>12 h</Text>
-                    <Ionicons name="cloudy-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>22°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>13 h</Text>
-                    <Ionicons name="thunderstorm-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>22°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>14 h</Text>
-                    <Ionicons name="thunderstorm-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>21°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>15 h</Text>
-                    <Ionicons name="thunderstorm-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>24°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>16 h</Text>
-                    <Ionicons name="thunderstorm-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>22°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>17 h</Text>
-                    <Ionicons name="thunderstorm-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>22°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>18 h</Text>
-                    <Ionicons name="cloudy-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>20°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>19 h</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>22°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>20 h</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>24°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>21 h</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>26°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>22 h</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>25°</Text>
-                 </View>
-
-                 <View style={styles.slideMeteo}>
-                    <Text style={styles.petit}>23 h</Text>
-                    <Ionicons name="cloudy-night-outline" color={"white"} size={30} 
-                    style={{paddingVertical:5, alignSelf:"center",alignContent:"center"}} />
-                    <Text style={styles.petit}>25°</Text>
-                 </View>
-
-              </ScrollView>
-
-        </BlurView>
-    )
+   return (
+     <BlurView intensity={70} style={styles.container}>
+       <View style={styles.first}>
+         <Text style={styles.petitMot}>Prévisions météo en temps réel</Text>
+       </View>
+       
+       <ScrollView horizontal>
+         {forecast.map((item, index) => (
+           <View key={index} style={styles.slideMeteo}>
+             <Text style={styles.petit}>
+               {new Date(item.dt * 1000).getHours()} h
+             </Text>
+             <Ionicons
+               name={getWeatherIcon(item.weather[0].main)} // Fonction pour afficher l'icône correspondante
+               color={"white"}
+               size={30}
+               style={{ paddingVertical: 5, alignSelf: "center", alignContent: "center" }}
+             />
+             <Text style={styles.petit}>{Math.round(item.main.temp)}°C</Text>
+           </View>
+         ))}
+       </ScrollView>
+     </BlurView>
+   );
 }
 
+// Fonction pour mapper les conditions météo avec les icônes Ionicons
+const getWeatherIcon = (weather: string) => {
+  switch (weather.toLowerCase()) {
+    case "clear":
+      return "sunny-outline";
+    case "clouds":
+      return "cloud-outline";
+    case "rain":
+      return "rainy-outline";
+    case "thunderstorm":
+      return "thunderstorm-outline";
+    case "snow":
+      return "snow-outline";
+    case "mist":
+      return "cloud-outline";
+    default:
+      return "cloudy-outline";
+  }
+};
+
 const styles = StyleSheet.create({
-    container:{
-       height:180,
-       width:350,
-       borderRadius:20,
-       overflow:"hidden"
-    },
-
-    first:{
-        margin:10,
-        padding:5,
-        borderBottomWidth:0.8,
-        borderColor:"white"
-    },
-
-    petitMot:{
-        color:"white",
-        fontWeight:"400",
-        fontSize:12,
-        alignSelf:"center",
-    },
-
-    slideMeteo:{
-      flexDirection:"column",
-      alignContent:"center",
-      marginHorizontal:10,
-      padding:10,
-      overflow:"hidden"
-    },
-
-    petit:{
-        color:"white",
-        fontWeight:"400",
-        fontSize:16,
-        alignSelf:"center",
-        alignContent:"center"
-    },
-
-})
+  container: {
+    height: 180,
+    width: 350,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  first: {
+    margin: 10,
+    padding: 5,
+    borderBottomWidth: 0.8,
+    borderColor: "white",
+  },
+  petitMot: {
+    color: "white",
+    fontWeight: "400",
+    fontSize: 12,
+    alignSelf: "center",
+  },
+  slideMeteo: {
+    flexDirection: "column",
+    alignContent: "center",
+    marginHorizontal: 10,
+    padding: 10,
+    overflow: "hidden",
+  },
+  petit: {
+    color: "white",
+    fontWeight: "400",
+    fontSize: 16,
+    alignSelf: "center",
+    alignContent: "center",
+  },
+});

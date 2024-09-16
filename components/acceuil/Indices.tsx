@@ -1,9 +1,61 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { BlurView } from "expo-blur";
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, ActivityIndicator, Alert } from 'react-native';
+import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location'// Importer expo-location
+import axios from 'axios';
+import { apiKey } from '@/constants/PageOne';
 import { Feather } from "@expo/vector-icons";
 
 export default function Indices(){
+    const [weather, setWeather] = useState<any>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  
+    const API_KEY = apiKey;
+  
+    useEffect(() => {
+      const fetchWeather = async (latitude: number, longitude: number) => {
+        try {
+          const URL = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&lang=fr&units=metric`;
+          const response = await axios.get(URL);
+          setWeather(response.data);
+        } catch (err) {
+          setError('Failed to fetch weather data');
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      const getLocation = async () => {
+        // Demander la permission de localisation
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission refusée', 'Impossible d\'accéder à la localisation');
+          setError('Location permission not granted');
+          setLoading(false);
+          return;
+        }
+  
+        // Récupérer la localisation actuelle
+        let currentLocation = await Location.getCurrentPositionAsync({});
+        setLocation(currentLocation);
+  
+        const { latitude, longitude } = currentLocation.coords;
+        fetchWeather(latitude, longitude);
+      };
+  
+      getLocation();
+    }, []);
+  
+    if (loading) {
+      return <ActivityIndicator size="large" color="#fff" style={{ marginTop: 50 }} />;
+    }
+  
+    if (error) {
+      return <Text style={{ color: 'red', alignSelf: 'center' }}>{error}</Text>;
+    }
     return(
         <View style={styles.container}>
 
@@ -16,7 +68,7 @@ export default function Indices(){
 
                 <View style={styles.contenu}>
 
-                     <Text style={styles.textdeux}>12</Text>
+                     <Text style={styles.textdeux}>{weather.wind.speed}</Text>
                      <View style={styles.miniSection}>
                         <Text style={styles.miniTexte}>km/h</Text>
                         <Text style={styles.miniTextDeux}>Vent</Text>
@@ -26,10 +78,10 @@ export default function Indices(){
 
                 <View style={styles.contenu}>
 
-                     <Text style={styles.textdeux}>12</Text>
+                     <Text style={styles.textdeux}>{weather.wind.deg}</Text>
                      <View style={styles.miniSection}>
-                        <Text style={styles.miniTexte}>km/h</Text>
-                        <Text style={styles.miniTextDeux}>Rafales</Text>
+                        <Text style={styles.miniTexte}>°</Text>
+                        <Text style={styles.miniTextDeux}>Degre</Text>
                      </View>
 
                 </View>
@@ -106,7 +158,6 @@ const styles = StyleSheet.create({
         margin:10,
         borderBottomWidth:0.7,
         borderBottomColor:"#A9A9A9",
-        padding:10
     },
 
     miniSection:{
