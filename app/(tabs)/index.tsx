@@ -11,13 +11,13 @@ const getBackgroundImage = () => {
   const hour = new Date().getHours();
 
   if (hour >= 6 && hour < 12) {
-    return require("../assets/images/morningSun.jpeg");
+    return require("../../assets/images/morningSun.jpeg");
   } else if (hour >= 12 && hour < 18) {
-    return require("../assets/images/afternoonSun.jpeg");
+    return require("../../assets/images/afternoonSun.jpeg");
   } else if (hour >= 18 && hour < 21) {
-    return require("../assets/images/backgroundSoir.jpg");
+    return require("../../assets/images/backgroundSoir.jpg");
   } else {
-    return require("../assets/images/nuit.jpeg");
+    return require("../../assets/images/nuit.jpeg");
   }
 };
 const backgroundImage = getBackgroundImage();

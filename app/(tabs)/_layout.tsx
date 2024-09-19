@@ -1,29 +1,34 @@
-import { Tabs } from 'expo-router';
+
 import React from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Drawer } from 'expo-router/drawer';
 
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-      }}>
-     
-      <Tabs.Screen
-        name="explore"
+export default function TabLayout(){
+  return ( 
+     <GestureHandlerRootView style={{ flex: 1 }}>
+      <Drawer>
+       
+     <Drawer.Screen
+        name="index"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+        title:'Acceuil',
+        drawerIcon: ({ }) => (
+        <Ionicons name= {'thunderstorm'} color="black" size={30}/>
+         ),
+        }}/>
+
+      <Drawer.Screen
+        name="Recherche"
+        options={{
+        title:'Recherche',
+        drawerIcon: ({ }) => (
+        <Ionicons name= {'grid'} color="black" size={30}/>
+         ),
+        }}/>
+
+     </Drawer>
+     </GestureHandlerRootView>
   );
-}
+};
